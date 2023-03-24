@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form autocomplete="off" method="POST">
+    <input type="hidden" name="kind" value="database">
+    <button type="submit"  class="btn btn-danger">Reset the Database</button>
+  </form>
+  <br>
+  <form autocomplete="off" method="POST">
+    <input type="hidden" name="kind" value="files">
+    <button type="submit"  class="btn btn-danger">Reset files</button>
+  </form>
+{% endblock %}

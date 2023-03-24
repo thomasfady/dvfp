@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Reflected XSS</h2>
+{% if name %}
+<div class="alert alert-secondary" role="alert">
+    Welcome {{ name|safe }}
+</div>
+{% endif %}
+<form autocomplete="off" class="form-inline">
+    <div class="form-group mx-sm-3 mb-2">
+        <label for="name">What is your name ?</label>
+        <input type="text" class="form-control" name="name" id="name" placeholder="Name">
+    </div>
+    <div class="form-group mx-sm-3 mb-2">
+        <button type="submit" class="btn btn-primary mb-2">Say hello !</button>
+    </div>
+</form>
+
+
+<h2>Stored XSS</h2>
+<h3>Add Comment</h3>
+<form autocomplete="off" method="POST">
+    <div class="form-group">
+            <input type="text" class="form-control" name="name" id="name" placeholder="Name" value="toto">
+    </div>
+    <div class="form-group">
+        <textarea class="form-control" name="comment" rows="4">
+Comment content
+        </textarea>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+<h3>Add Comment with XSS</h3>
+<form autocomplete="off" method="POST">
+    <div class="form-group">
+            <input type="text" class="form-control" name="name" id="name" placeholder="Name" value="evil toto">
+    </div>
+    <div class="form-group">
+        <textarea class="form-control" name="comment" rows="4">
+Comment content <script>alert("XSS Stored")</script>          
+        </textarea>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+
+<h3>Comments</h3>
+{% if comments %}
+{% for comment in comments %}
+<p><b>{{ comment['name'] }}</b></p>
+<p>{{ comment['comment']|safe }}</p>
+<hr>
+{% endfor %}
+{% else %}
+No Comments
+{% endif %}
+{% endblock %}
+
+{% block sources %}
+{% filter markdown %}
+<div class="btn-group" role="group" aria-label="Basic example">
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseOne">GET /a7-xss</button>
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseTwo">POST /a7-xss</button>
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseThree">Comment HTML</button>
+</div>
+
+<div class="accordion" id="accordionExample">
+    <div class="card">
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/a7-xss')
+def get_a7_xss():
+    comments = models.Comment.query.all()
+    if request.args.get('name'):
+        return render_template("xss.html",comments=comments,name=request.args['name'],title="A7 - Cross-Site Scripting (XSS)")
+    else:
+        return render_template("xss.html",comments=comments,title="A7 - Cross-Site Scripting (XSS)")
+```
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/a7-xss',methods=['POST'])
+def post_a7_xss():
+    
+    c = models.Comment(name=request.form['name'],comment=request.form['comment'])
+    db.session.add(c)
+    db.session.commit()
+    comments = models.Comment.query.all()
+    return render_template("xss.html",comments=comments,title="A7 - Cross-Site Scripting (XSS)")
+```  
+</div>
+</div>
+</div>
+<div class="card">
+    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+      <div class="card-body">
+```jinja
+{% raw %}
+<h3>Comments</h3>
+{% if comments %}
+{% for comment in comments %}
+<p><b>{{ comment['name'] }}</b></p>
+<p>{{ comment['comment']|safe }}</p>
+<hr>
+{% endfor %}
+{% else %}
+No Comments
+{% endif %}
+{% endblock %}
+{% endraw %}
+```
+      </div>
+    </div>
+  </div>
+</div>
+{% endfilter %}
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if is_authenticated() %}
+    <h2>Welcome {{ me()['name'] }} !</h2>
+    <p>Edit my profile : <a href="/profile">Here</a></p>
+{% endif %}
+{% endblock %}

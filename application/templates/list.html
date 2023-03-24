@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Email</th>
+        <th scope="col">Job</th>
+        <th scope="col">Edit</th>
+        <th scope="col">Promote</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for row in users %}
+        <tr>
+        <th scope="row">{{ row['id'] }}</th>
+        <td>{{ row['name'] }}</td>
+        <td>{{ row['email'] }}</td>
+        <td>{{ row['job'] }}</td>
+        <td>
+            {% if row['id']==me()['id'] or is_admin() %}
+            <a href="profile/{{ row['id'] }}">Edit User</a>
+            {% endif %}
+        </td>
+        {% if row['role']=="user" %}
+        <td><a href="list?promote={{ row['id'] }}">Promote to Admin</a></td>
+        {% else %}
+        <td><a href="list?downgrade={{ row['id'] }}">Downgrade to User</a></td>
+        {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

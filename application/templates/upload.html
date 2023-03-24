@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if path_file %}
+<p>File uploaded to : <b>{{ path_file }}</b></p>
+{% endif %}
+<p>Upload file in <b>files</b> directory:</p>
+<form autocomplete="off" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <input type="file" class="form-control-file" name="file">
+    </div>
+    <div class="col-auto my-1">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block sources %}
+{% filter markdown %}
+<div class="btn-group" role="group" aria-label="Basic example">
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseOne">GET /cwe-434</button>
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseTwo">POST /cwe-434</button>
+</div>
+
+<div class="accordion" id="accordionExample">
+    <div class="card">
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/cwe-434')
+def get_cwe_434():
+    return render_template("upload.html",title="CWE-434 : Unrestricted file upload")
+```
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/cwe-434',methods=['POST'])
+def post_cwe_434():
+    file = request.files['file']
+    path_file = os.path.join(os.path.dirname(__file__),"files",file.filename)
+    file.save(path_file)
+    return render_template("upload.html",path_file=path_file,title="CWE-434 : Unrestricted file upload")
+```  
+</div>
+</div>
+</div>
+</div>
+{% endfilter %}
+{% endblock %}

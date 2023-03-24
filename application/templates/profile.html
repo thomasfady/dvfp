@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form autocomplete="off" method="POST">
+    <div class="form-group">
+        <label></label>Email address</label>
+        <input type="text" class="form-control" name="email" value="{{ user.email }}" placeholder="Enter email">
+    </div>
+    <div class="form-group">
+        <label>Name</label>
+        <input type="text" class="form-control" name="name" value="{{ user.name }}" placeholder="Enter name">
+    </div>
+    <div class="form-group">
+        <label>Job</label>
+        <input type="text" class="form-control" name="job" value="{{ user.job }}" placeholder="Enter job">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+<h2>Change password</h2>
+<form autocomplete="off" method="POST">
+    <div class="form-group">
+        <label></label>New Password</label>
+        <input type="password" class="form-control" name="password" value="{{ user.password }}" placeholder="Enter email">
+    </div>
+    <div class="form-group">
+        <input type="hidden" class="form-control" name="id" value="{{ user.id }}" placeholder="Enter name">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock %}
+{% block sources %}
+{% filter markdown %}
+<div class="btn-group" role="group" aria-label="Basic example">
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseOne">GET /profile</button>
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseTwo">POST /profile</button>
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseThree">GET /profile/&lt;int:id&gt;</button>
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseFour">POST /profile/&lt;int:id&gt;</button>
+</div>
+
+<div class="accordion" id="accordionExample">
+    <div class="card">
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/profile')
+@authenticated
+def get_profile():
+    login = models.User.query.filter_by(id=session["user"]["id"]).first()
+    return render_template("profile.html",title="My Profile",user=login)
+```
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/profile',methods=["POST"])
+@authenticated
+def post_profile():
+    return post_profile_with_id(session["user"]["id"])
+```  
+</div>
+</div>
+</div>
+<div class="card">
+  <div id="collapseThree" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+    <div class="card-body">
+```python
+@app.route('/profile/<int:id>')
+@authenticated
+def get_profile_with_id(id):
+    login = models.User.query.filter_by(id=id).first()
+    return render_template("profile.html",title="My Profile",user=login)
+```
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div id="collapseFour" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+    <div class="card-body">
+```python
+@app.route('/profile/<int:id>',methods=["POST"])
+@authenticated
+def post_profile_with_id(id):
+    if 'password' in request.form:
+        login = models.User.query.filter_by(id=request.form['id']).first()
+        login.password = request.form['password']
+        db.session.commit()
+        flash(u'Password updated', 'success')
+    elif 'email' in request.form and 'name' in request.form and 'job' in request.form:
+        not_existing = models.User.query.filter_by(id=request.form['email']).first()
+        login = models.User.query.filter_by(id=id).first()
+        if not not_existing or login.email == request.form['email']:
+            try:
+                login.email = request.form['email']
+                login.name = request.form['name']
+                login.job = request.form['job']
+                db.session.commit()
+                if session["user"]["id"]==login.id:
+                    session["auth"] = True
+                    session["user"] = {"id":login.id,"name":login.name,"email":login.email,"role":login.role}
+                flash(u'Profile updated', 'success')
+            except:
+                flash(u'Error during the profile edition process', 'danger')
+        else:
+            flash(u'Email already taken', 'danger')
+    return redirect(request.referrer, code=302)
+```
+    </div>
+  </div>
+</div>
+</div>
+{% endfilter %}
+{% endblock %}

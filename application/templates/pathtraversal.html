@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<p>Select file to read in <b>files</b> directory:</p>
+<form autocomplete="off" method="POST" class="form-inline">
+    <div class="col-auto my-1">
+        <select class="custom-select" name="file" id="file">
+            {% for file in lst %}
+            <option value="{{ file }}">{{ file }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto my-1">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+{% if file_path %}
+<p>Reading file : <b>{{ file_path }} </b></p>
+<pre>
+{{ file_content }}
+</pre>
+{% endif %}
+{% endblock %}
+
+{% block sources %}
+{% filter markdown %}
+<div class="btn-group" role="group" aria-label="Basic example">
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseOne">GET /cwe-23</button>
+  <button type="button" class="btn btn-secondary" data-toggle="collapse" data-target="#collapseTwo">POST /cwe-23</button>
+</div>
+
+<div class="accordion" id="accordionExample">
+    <div class="card">
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/cwe-23')
+def get_cwe_23():
+    return render_template("pathtraversal.html",lst=list_files_dir(),title="CWE-23 : Relative Path Traversal")
+```
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+        <div class="card-body">
+```python
+@app.route('/cwe-23',methods=['POST'])
+def post_cwe_23():
+    file_path = os.path.join(os.path.dirname(__file__),"files",request.form['file'])
+    with open(file_path, 'r') as fd:
+        content = fd.read()
+    return render_template("pathtraversal.html",file_content=content,file_path=file_path,lst=list_files_dir(),title="CWE-23 : Relative Path Traversal")
+```  
+</div>
+</div>
+</div>
+</div>
+{% endfilter %}
+{% endblock %}

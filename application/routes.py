@@ -88,12 +88,11 @@ def get_a7_xss():
 
 @app.route('/a7-xss-csp')
 def get_a7_xss_csp():
-    comments = models.Comment.query.all()
     if request.args.get('name'):
-        resp = make_response(render_template("xss-csp.html",comments=comments,name=request.args['name'],title="A7 - Cross-Site Scripting (XSS)"))
+        resp = make_response(render_template("xss-csp.html",name=request.args['name'],title="A7 - Cross-Site Scripting (XSS)"))
         resp.headers['Content-Security-Policy']="script-src 'self' https://*.google.com; object-src 'none';"
     else:
-        resp = make_response(render_template("xss-csp.html",comments=comments,title="A7 - Cross-Site Scripting (XSS)"))
+        resp = make_response(render_template("xss-csp.html",title="A7 - Cross-Site Scripting (XSS)"))
     return resp
 
 @app.route('/cwe-434')
